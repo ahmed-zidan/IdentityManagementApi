@@ -7,9 +7,9 @@ namespace Api.Middlewares
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
+        private readonly ILogger<ExceptionMiddleware> _logger;
         private readonly IHostEnvironment _host;
-        public ExceptionMiddleware(RequestDelegate request, ILogger logger,IHostEnvironment hostEnvironment)
+        public ExceptionMiddleware(RequestDelegate request,ILogger<ExceptionMiddleware> logger,IHostEnvironment hostEnvironment)
         {
             _next = request;
             _logger = logger;

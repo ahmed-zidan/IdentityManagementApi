@@ -4,10 +4,12 @@ using Api.Helpers;
 using AutoMapper;
 using Core.Identity;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -31,14 +33,14 @@ namespace Api.Controllers
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null) { 
-                return Unauthorized(new ApiResponse(404));
+                return Unauthorized(new ApiResponse(401));
             }
             if (user.EmailConfirmed == false) { 
-                return Unauthorized(new ApiResponse(400,"Please confirm your email"));
+                return Unauthorized(new ApiResponse(401,"Please confirm your email"));
             }
             var res = await _signInManager.CheckPasswordSignInAsync(user, model.Password,false);
             if (!res.Succeeded) {
-                return Unauthorized(new ApiResponse(404));
+                return Unauthorized(new ApiResponse(401));
             }
             return Ok(getUserInfo(user));
         }
@@ -54,7 +56,7 @@ namespace Api.Controllers
             var res = await _userManager.CreateAsync(user,model.Password);
             if (!res.Succeeded)
             {
-                return BadRequest(new ApiResponse(400 , string.Join(",",res.Errors)));
+                return BadRequest(new ApiResponse(400 , string.Join(",",res.Errors.Select(x=>x.Description))));
             }
             return Ok();
         }
@@ -72,6 +74,14 @@ namespace Api.Controllers
         private async Task<bool> isEmailExists(string email)
         {
             return await _userManager.Users.AnyAsync(x=>x.Email.ToLower() == email.ToLower());
+        }
+
+        [HttpGet("refreshUserToken")]
+        [Authorize]
+        public async Task<ActionResult<UserInfoDto>> refreshUserToken()
+        {
+            var user = await _userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.Email)?.Value);
+            return Ok(getUserInfo(user));
         }
 
     }

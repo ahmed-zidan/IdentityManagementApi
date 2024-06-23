@@ -15,7 +15,7 @@ builder.Services.AddDbContext<MyDbContext>(opt => opt.UseSqlServer(
     builder.Configuration.GetConnectionString("IdentityAppDb")));
 
 builder.Services.addIdentityServices(builder.Configuration);
-
+builder.Services.AddApplicationServices();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -10,5 +10,6 @@ namespace Core.Interfaces
     public interface IJWTService
     {
         string CreateJWT(AppUser user);
+        
     }
 }
